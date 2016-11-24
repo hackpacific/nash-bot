@@ -2,7 +2,7 @@
 import subprocess
 import os
 
-from bottle import post, request, run, hook, template, route
+from bottle import post, request, run, hook, template, route, get
 
 
 @hook('before_request')
@@ -25,13 +25,14 @@ def _search(query):
     return output
 
 
-@post('/howdoi')
+@get('/howdoi')
 def howdoi():
     """
     Example:
         /howdoi open file python
     """
-    text = request.forms.text
+    # text = request.forms.text
+    text = request.query.text
     if not text:
         return 'Please type a ?text= param'
 
