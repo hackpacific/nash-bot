@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 import subprocess
 import os
+import json
 
 from bottle import post, request, run, hook, template, route, get
-
+from pymessenger.bot import Bot
 
 @hook('before_request')
 def strip_path():
@@ -40,6 +41,30 @@ def howdoi():
     # formatting
     return output
 
+@get('/webhook')
+def webhook():
+    if 'hub.mode' in request.query and request.query['hub.mode'] == "subscribe":
+        challenge = request.query['hub.challenge']
+        return challenge
+    else:
+        return 'null'
+
+@post('/webhook')
+def webhook():
+    body = json.load(request.body)
+    print body
+
+    bot = Bot('EAAJudOVDEOYBAOYJVj7sRGXnv4S5MaFrjSJjN8SZCHB269BQk7GUTzZCE8ZCrRpOv97ZC3wbVSzww3eYfpjRCPfBrmUZCHrouSj9M2M1ZAYqIJKxzXfrnfM7g8zeliyGdrl7BcnIftYZAsPQD3WZA2pRDcNM85ToJTCPjQ1cAQdgsQZDZD')
+
+    for entry in body['entry']:
+        for message in entry['messaging']:
+            if 'text' in message['message']:
+                recipient_id = message['sender']['id']
+                question = message['message']['text']
+                answer = _search(question)
+                bot.send_text_message(recipient_id, answer)
+
+    return None
 
 @route('/')
 def index():
